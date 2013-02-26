@@ -1,3 +1,8 @@
+import random
+
+SUITES = ['Diamonds', 'Hearts', 'Spades', 'Clubs']
+RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+
 class Card(object):
 
     def __init__(self, rank, suite):
@@ -26,25 +31,28 @@ class Card(object):
     def __repr__(self):
         return 'Card=(rank=%s,suite=%s)' % (self._rank, self._suite)
 
-
 class Deck(object):
 
     def __init__(self):
         self._cards = []
-        for suite in ['Diamonds', 'Hearts', 'Spades', 'Clubs']:
-            for rank in ['2', '3', '4', '5', '6', '7', '8',
-                         '9', '10', 'J', 'Q', 'K', 'A']:
+        for suite in SUITES:
+            for rank in RANKS:
                 self._cards.append(Card(rank, suite))
 
     def popCard(self):
         return self._cards.pop()
 
+    def shuffle(self):
+        return random.shuffle(self._cards)
+
     def __repr__(self):
         return repr(self._cards)
 
-    def __len__(self):
-        return len(self._cards)
+    def __eq__(self, another):
+        return self._cards == another._cards
 
+    def __ne__(self, another):
+        return self._cards != another._cards
 
 class Dealer(object):
 
@@ -67,4 +75,7 @@ class Dealer(object):
 
     def dealOneCard(self):
         return self._deck.popCard()
+
+    def shuffleCards(self):
+        return self._deck.shuffle()
 

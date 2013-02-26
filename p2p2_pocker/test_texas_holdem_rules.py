@@ -1,6 +1,6 @@
 import unittest
 
-from pocker_entities import Dealer, Card
+from pocker_entities import Dealer, Deck, Card
 
 class TestTexasHoldemRules(unittest.TestCase):
 
@@ -12,7 +12,7 @@ class TestTexasHoldemRules(unittest.TestCase):
 
     def testTableHandReceives5Cards(self):
         hand = self._dealer.dealTableHand()
-        self.assertEqual(5, len(hand))
+        self.assertEqual(len(hand), 5)
 
     def testTableHandReceivesValidCards(self):
         hand = self._dealer.dealTableHand()
@@ -20,7 +20,7 @@ class TestTexasHoldemRules(unittest.TestCase):
 
     def testPlayerHandReceives2Cards(self):
         hand = self._dealer.dealPlayerHand()
-        self.assertEqual(2, len(hand))
+        self.assertEqual(len(hand), 2)
 
     def testPlayerReceivesValidCards(self):
         hand = self._dealer.dealPlayerHand()
@@ -31,10 +31,38 @@ class TestTexasHoldemRules(unittest.TestCase):
         self.assertNotEqual(hand[0], hand[1])
 
     def testUniqueCardsAreDealtFromOneDeck(self):
-        dealtCards = []
-        for i in range(52):
-            dealtCards.append(self._dealer.dealOneCard())
+        dealtCards = [self._dealer.dealOneCard() for i in range(52)]
         self._assertUniqueCards(dealtCards)
+
+    def testCardsAreShuffled(self):
+        initialDeck = Deck()
+        self._dealer.shuffleCards()
+        shuffledDeck = self._dealer.deck
+        self.assertNotEqual(shuffledDeck, initialDeck)
+
+    def testShuffledDecksAreDifferent(self):
+        deck1 = Deck()
+        deck2 = Deck()
+        deck1.shuffle()
+        deck2.shuffle()
+        self.assertNotEqual(deck1, deck2)
+
+    def testDeckHasExactly52Cards(self):
+        deck = Deck()
+        for i in range(52):
+            deck.popCard()
+        with self.assertRaises(IndexError) as outcome:
+            deck.popCard()
+        ie = outcome.exception
+        self.assertEqual(ie.message, 'pop from empty list')
+
+    def testDealerMayGiveOutUpTo52Cards(self):
+        for i in range(52):
+            self._dealer.dealOneCard()
+        with self.assertRaises(IndexError) as outcome:
+            self._dealer.dealOneCard()
+        ie = outcome.exception
+        self.assertEqual(ie.message, 'pop from empty list')
 
     def _assertUniqueCards(self, deck):
         for i, card in zip(range(52), deck):
@@ -48,6 +76,11 @@ class TestTexasHoldemRules(unittest.TestCase):
         self.assertIn(card.rank, ['2', '3', '4', '5', '6', '7', '8',
                                   '9', '10', 'J', 'Q', 'K', 'A'])
         self.assertIn(card.suite, ['Spades', 'Hearts', 'Diamonds', 'Clubs'])
+
+class TestAutomatedDealer(unittest.TestCase):
+
+    def setUp(self):
+        pass
 
 
 if __name__ == '__main__':
