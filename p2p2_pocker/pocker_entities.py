@@ -31,6 +31,9 @@ class Card(object):
     def __repr__(self):
         return 'Card=(rank=%s,suite=%s)' % (self._rank, self._suite)
 
+    def __str__(self):
+        return '%s of %s' % (self._rank, self._suite)
+
 class Deck(object):
 
     def __init__(self):
@@ -68,14 +71,61 @@ class Dealer(object):
         self._deck = value
 
     def dealPlayerHand(self):
-        return (self.dealOneCard(), self.dealOneCard())
+        cards = (self.dealOneCard(), self.dealOneCard())
+        return Hand(cards)
 
     def dealTableHand(self):
-        return tuple([self.dealOneCard() for i in range(5)])
+        cards = tuple([self.dealOneCard() for i in range(5)])
+        return Hand(cards)
 
     def dealOneCard(self):
         return self._deck.popCard()
 
     def shuffleCards(self):
         return self._deck.shuffle()
+
+class Player(object):
+
+    def __init__(self, name):
+        self._name = name
+        self._hand = None
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def hand(self):
+        return self._hand
+
+    @hand.setter
+    def hand(self, value):
+        self._hand = value
+
+    def __repr__(self):
+        return 'Player=(name=%s,%r)' % (self._name, self._hand)
+
+    def __str__(self):
+        return '%s has the following hand:\n%s' % (self._name, self._hand)
+
+class Hand(object):
+
+    def __init__(self, cards):
+        self._cards = cards
+
+    def __iter__(self):
+        return iter(self._cards)
+
+    def __getitem__(self, index):
+        return self._cards[index]
+
+    def __len__(self):
+        return len(self._cards)
+
+    def __repr__(self):
+        return 'Hand=%s' % self._cards
+
+    def __str__(self):
+        cardsAsStrings = [str(card) for card in self._cards]
+        return '\n'.join(cardsAsStrings)
 

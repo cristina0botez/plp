@@ -16,7 +16,7 @@ class TestTexasHoldemRules(unittest.TestCase):
 
     def testTableHandReceivesValidCards(self):
         hand = self._dealer.dealTableHand()
-        self._assertValidHand(5, hand)
+        self._assertValidHand(hand)
 
     def testPlayerHandReceives2Cards(self):
         hand = self._dealer.dealPlayerHand()
@@ -24,7 +24,7 @@ class TestTexasHoldemRules(unittest.TestCase):
 
     def testPlayerReceivesValidCards(self):
         hand = self._dealer.dealPlayerHand()
-        self._assertValidHand(2, hand)
+        self._assertValidHand(hand)
 
     def testPlayerReceivesUniqueCards(self):
         hand = self._dealer.dealPlayerHand()
@@ -68,19 +68,14 @@ class TestTexasHoldemRules(unittest.TestCase):
         for i, card in zip(range(52), deck):
             self.assertNotIn(card, deck[:i])
 
-    def _assertValidHand(self, handSize, hand):
-        for i in range(handSize):
-            self._assertValidCard(hand[i])
+    def _assertValidHand(self, hand):
+        for card in hand:
+            self._assertValidCard(card)
 
     def _assertValidCard(self, card):
         self.assertIn(card.rank, ['2', '3', '4', '5', '6', '7', '8',
                                   '9', '10', 'J', 'Q', 'K', 'A'])
         self.assertIn(card.suite, ['Spades', 'Hearts', 'Diamonds', 'Clubs'])
-
-class TestAutomatedDealer(unittest.TestCase):
-
-    def setUp(self):
-        pass
 
 
 if __name__ == '__main__':
