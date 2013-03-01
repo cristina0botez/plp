@@ -1,7 +1,8 @@
 import unittest
 
-from card_game_entities import Deck, Card
+from card_game_entities import Deck
 from texas_holdem import TexasHoldemDealer
+import texas_holdem
 
 
 SUITS = ['Spades', 'Hearts', 'Diamonds', 'Clubs']
@@ -63,7 +64,7 @@ class TestTexasHoldemRules(unittest.TestCase):
         self.assertIn(card.suit, SUITS)
 
 
-class TestAutomatedDealer(unittest.TestCase):
+class TestPlayerRegistration(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -71,71 +72,24 @@ class TestAutomatedDealer(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_reading_empty_string_for_name_raises_error(self):
-        stdin_mock = open(STDIN_MOCK_FILENAME, 'w')
-        stdin_mock.write('\n')
-        stdin_mock.close()
-        sys.stdin = open(STDIN_MOCK_FILENAME, 'r')
-        sys.stdout = open(STDOUT_MOCK_FILENAME, 'w')
+    def test_name_registration_returns_the_players(self):
+        playerNames = ['Albert', 'Bob', 'Jim']
+        players = texas_holdem.register_players(playerNames)
+        self.assertEqual([player.name for player in players], playerNames)
+
+    def test_register_one_player_raises_error(self):
         with self.assertRaises(ValueError) as outcome:
-            texas_holdem.read_player_name(1)
+            texas_holdem.register_players(['Bob'])
         ve = outcome.exception
-        self.assertEqual(ve.message, 'No name given')
-        sys.stdout.close()
-        sys.stdout = sys.__stdout__
-        sys.stdin.close()
-        sys.stdin = sys.__stdin__
+        self.assertEqual(ve.message,
+                         'Not enough players. A minimum of 2 is required.')
 
-    def test_return_players_read_from_input(self):
-        PLAYER_NAMES = ('Bob', 'Nick', 'Jenny')
-        self._set_up_io_for_registration(PLAYER_NAMES)
-        players = texas_holdem.registerPlayers()
-        self._assertCorrectPlayers(players, PLAYER_NAMES)
-        self._tearDownIOForRegistration()
-
-    def testInputOnlyOnePlayerThrowsError(self):
-        PLAYER_NAMES = ('Bob',)
-        self._setUpIOForRegistration(PLAYER_NAMES)
-        with self.assertRaises(texas_holdem.RegistrationError) as outcome:
-            texas_holdem.registerPlayers()
-        re = outcome.exception
-        self.assertEqual(re.message,
-                'Not enough players. A minimum of 2 is required.')
-        self._tearDownIOForRegistration()
-
-    def testEachPlayerReceives2Cards(self):
-        players = (Player('Bob'), Player('Nick'), Player('Jenny'))
-        texas_holdem.distributeCardsToPlayers(Dealer(), players)
-        self._assertCorrectCardToPlayerDistribution(players)
-
-    def testTableReceives5Cards(self):
-        tableHand = texas_holdem.setCardsOnTable(Dealer())
-        self.assertEqual(len(tableHand), 5)
-
-    def _assertCorrectPlayers(self, actualPlayers, expectedNames):
-        self.assertEqual(len(expectedNames), len(actualPlayers))
-        for player in actualPlayers:
-            self.assertIn(player.name, expectedNames)
-
-    def _assertCorrectCardToPlayerDistribution(self, players):
-        for player in players:
-            self.assertEqual(len(player.hand), 2)
-
-    def _setUpIOForRegistration(self, namesList):
-        playerNamesFile = open(PLAYER_NAMES_FILENAME, 'w')
-        playerNamesFile.writelines(['%s\n' % name for name in namesList])
-        playerNamesFile.write('\n')
-        playerNamesFile.close()
-        sys.stdin = open(PLAYER_NAMES_FILENAME, 'r')
-        sys.stdout = open(REGISTRATION_OUTPUT_FILENAME, 'w')
-
-    def _tearDownIOForRegistration(self):
-        sys.stdin.close()
-        sys.stdout.close()
-        sys.stdin = sys.__stdin__
-        sys.stdout = sys.__stdout__
-        os.remove(PLAYER_NAMES_FILENAME)
-        os.remove(REGISTRATION_OUTPUT_FILENAME)
+    def test_register_10_players_raises_error(self):
+        with self.assertRaises(ValueError) as outcome:
+            texas_holdem.register_players(['Bob'] * 10)
+        ve = outcome.exception
+        self.assertEqual(ve.message, 'Too many players. At most 9 players can'
+                ' join the game.')
 
 
 if __name__ == '__main__':

@@ -44,6 +44,9 @@ class Deck(object):
         """
         return self._cards != other._cards
 
+    def __len__(self):
+        return len(self._cards)
+
     def __repr__(self):
         return '%s(ranks=%r, suits=%r)' % (self.__class__.name,
                                             suits, ranks)

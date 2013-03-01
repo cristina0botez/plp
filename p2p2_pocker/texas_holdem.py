@@ -9,6 +9,8 @@ the Dealer should draw the table Hand of 5 Cards.
 
 """
 
+
+import sys
 from card_game_entities import Card, Deck, Player, Hand
 
 
@@ -47,7 +49,7 @@ def register_players(player_names):
         raise ValueError('Not enough players. A minimum of 2 is required.')
     elif len(player_names) > 9:
         raise ValueError(
-                'Too many players. At most 9 players can join the game')
+                'Too many players. At most 9 players can join the game.')
     players = [Player(name) for name in player_names]
     print '%d players are in the game: %s' % (len(players), players)
     return tuple(players)
@@ -86,32 +88,39 @@ def read_player_name(index):
 
 
 def distribute_cards_to_players(dealer, players):
+    """
+    Provisions each player with a suitable hand of cards.
+    The dealer must implement a deal_player_hand() method that provides a hand
+    of cards appropriate for the game.
+    The player must have a hand property used to store the set of cards.
+
+    """
     for player in players:
         player.hand = dealer.deal_player_hand()
     return players
 
 
-def set_cards_on_table(dealer):
-    return dealer.deal_table_hand()
-
-
-def display_cards(table_hand, players):
-    print '\nCards on table:\n%s\n' % str(table_hand)
-    for player in players:
-        print '%s\n' % player
+def serialize_cards(table_hand, players):
+    """Serialize the dealt cards in a string."""
+    table_cards = '\nCards on table:\n%s\n' % str(table_hand)
+    player_cards = ['\n%s\n' % player for player in players]
+    result = table_cards + ''.join(player_cards)
+    return result
 
 
 def runner():
+    """Runs the automated Texas Hold'em dealer."""
     player_names = read_all_player_names()
     try:
-        players = register_players(play)
+        players = register_players(player_names)
     except ValueError, re:
         print re.message
-    dealer = Dealer()
-    dealer.shuffleCards()
-    distributeCardsToPlayers(dealer, players)
-    tableHand = setCardsOnTable(dealer)
-    displayCards(tableHand, players)
+        sys.exit(0)
+    dealer = TexasHoldemDealer()
+    dealer.shuffle_cards()
+    players = distribute_cards_to_players(dealer, players)
+    table_hand = dealer.deal_table_hand()
+    print serialize_cards(table_hand, players)
 
 
 if __name__ == '__main__':
